@@ -26,10 +26,14 @@ esac
 command -v brew >/dev/null || { echo "Homebrew is missing. Install it from https://brew.sh, then rerun this script." >&2; exit 1; }
 case "$action" in
   list) exec brew bundle list --all --file="$root/Brewfile" ;;
-  check) exec brew bundle check --verbose --file="$root/Brewfile" ;;
+  check)
+    brew bundle check --verbose --file="$root/Brewfile"
+    python3 "$root/scripts/install-cores.py" --check
+    ;;
   install)
     echo "Installing/updating packages from $root/Brewfile"
     brew bundle install --file="$root/Brewfile"
+    python3 "$root/scripts/install-cores.py"
     brew bundle check --verbose --file="$root/Brewfile"
     echo "Installation verified. Next: configure library paths and run macos/bootstrap.sh check."
     ;;
