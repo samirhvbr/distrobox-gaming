@@ -12,6 +12,46 @@ concise imperative subjects, no version prefix, no entry here. See
 Bodies are narrative: what changed, why, and what was measured. This file is
 never rewritten.
 
+## 0.4.0 - the macOS stack plays the 8- and 16-bit libraries
+
+The macOS baseline stopped at four console emulators, so the downloaded Atari,
+Nintendo, Sega and Commodore collections had nothing to run them. RetroArch
+Metal plus seven libretro cores closes that: Atari 2600 (two collections), NES,
+SNES, Master System, Mega Drive, GBA, Game Boy/Color and C64.
+
+Cores are not Homebrew packages, so `install-cores.py` fetches them from the
+Libretro buildbot for the Mac's architecture, verifies each with `lipo
+-verify_arch` and installs atomically. The buildbot URL is a rolling `latest`,
+and the recorded SHA-256 is an integrity record of what was fetched, not a pin
+like the Linux tree's tarballs. That divergence is stated in `INSTALL.md` and
+in the PR rather than left for a reviewer to notice.
+
+Two display findings came out of running it rather than reading about it.
+Launching from ES-DE sat on a black screen until `pause_nonactive = "false"`,
+because ES-DE keeps focus while RetroArch starts. Then the image advanced only
+while the mouse moved — the experimental Metal driver — so the default became
+`video_driver = "vulkan"`, which the same RetroArch Metal application provides
+through MoltenVK. Both settings are applied with `--appendconfig`, so a user's
+own RetroArch configuration is never touched.
+
+`import-metadata.py` brings each collection's existing `gamelist.xml` into
+ES-DE, rewriting paths to absolute form and symlinking cover art. Source ROMs
+and metadata are never modified, and entries are confined to the library root.
+
+Review of the work found the canonical `INSTALL.md` still describing a
+four-application install, and the new retro documentation sitting in a separate
+Portuguese file that the rest of the repository does not match. The retro
+documentation is now merged into `INSTALL.md` in English, and `INSTALL.md`
+lists RetroArch and the core step it had omitted. A `verify.py` assertion for
+the four console systems' `(Standalone)` labels, dropped when the retro
+assertions were added, is restored.
+
+Gameplay is confirmed for the first time in this stack: a NES ROM under
+Nestopia and an Atari 2600 ROM under Stella both loaded and rendered through
+Vulkan/MoltenVK on Apple Silicon. Audio, controllers, saves and the remaining
+systems are still unverified, and the four console emulators still need real
+games and a PS2 BIOS.
+
 ## 0.3.1 - no Atari system needs a BIOS file, and ROMS/ stays out of git
 
 The BIOS table still marked `lynxboot.img` as required. Same mistake as the
