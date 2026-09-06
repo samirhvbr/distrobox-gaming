@@ -113,10 +113,11 @@ dg_retroarch_buildbot: https://buildbot.libretro.com
 #   ATARIOSA.ROM  atari800 core, 400/800 OS rev A
 #   ATARIOSB.ROM  atari800 core, 400/800 OS rev B
 #   lynxboot.img  handy core (Atari Lynx)
-# Only the Lynx actually needs its file. The atari800 core compiles in
-# AltirraOS, a freely redistributable OS replacement, so the 5200 and the
-# 8-bit line boot without any of the four above — the wrapper selects it
-# for the 5200 automatically. See docs/atari.md.
+# None of these are actually required. The atari800 core compiles in
+# AltirraOS, a freely redistributable OS replacement (the wrapper selects
+# it for the 5200 automatically), and handy high-level-emulates the Lynx
+# boot ROM when lynxboot.img is absent. The list exists so that a user who
+# DOES own the dumps runs the original ROMs. See docs/atari.md.
 # Stella (2600) needs none. ProSystem (7800) takes an optional
 # "7800 BIOS (U).rom"; it is left out because the filename varies by
 # dump and the core boots fine without it. The list is the extension

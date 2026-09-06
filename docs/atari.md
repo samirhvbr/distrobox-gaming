@@ -21,7 +21,7 @@ a TOS revision is a per-machine choice and not a fleet-wide BIOS.
 | `atari2600` | `stella` | `roms/atari2600` | `.a26 .bin .rom .zip .7z` | none |
 | `atari5200` | `atari800` (wrapper) | `roms/atari5200` | `.a52 .bin .car .rom .zip .7z` | optional |
 | `atari7800` | `prosystem` | `roms/atari7800` | `.a78 .bin .zip .7z` | optional |
-| `atarilynx` | `handy` | `roms/atarilynx` | `.lnx .o .zip .7z` | `lynxboot.img` |
+| `atarilynx` | `handy` | `roms/atarilynx` | `.lnx .o .zip .7z` | optional |
 | `atari800` | `atari800` (wrapper) | `roms/atari800` | `.atr .bas .bin .car .cas .dcm .xex .xfd .zip .7z` | optional |
 
 All four sit in the light `roms/` tier alongside NES and SNES — Atari
@@ -100,7 +100,7 @@ out of `dg_bios_root` into `dg_retroarch_system_dir`
 | `ATARIXL.ROM` | Atari 800, 800XL / 130XE | No — see AltirraOS below |
 | `ATARIBAS.ROM` | Atari 800, built-in BASIC | No — see AltirraOS below |
 | `ATARIOSA.ROM` / `ATARIOSB.ROM` | Atari 800, 400/800 OS revs A and B | No |
-| `lynxboot.img` | Atari Lynx | **Yes** |
+| `lynxboot.img` | Atari Lynx | No — the core HLEs the boot ROM |
 
 Stella needs none. ProSystem takes an optional `7800 BIOS (U).rom`; it is
 left out of the list because the filename varies by dump and the core
@@ -111,7 +111,7 @@ None of these are redistributable, so source them yourself into
 `dg_bios_root`, same as every other BIOS in
 [setup-assets.md](setup-assets.md).
 
-### The Atari 8-bit line and the 5200 need no BIOS at all
+### None of it is actually required
 
 The core **compiles in** Avery Lee's AltirraOS, a clean-room, freely
 redistributable replacement for Atari's OS ROMs — `altirra_5200_os.c`,
@@ -133,8 +133,16 @@ if you would rather not source the original ROMs. Compatibility is high
 but not identical: a title that pokes at OS internals may behave
 differently on the replacement.
 
-Only the **Lynx** genuinely requires a file here: `lynxboot.img` has no
-free equivalent bundled in the `handy` core.
+The Lynx needs no file either. `handy` constructs
+`new CSystem(..., bios_file, !bios_found, eeprom_file)` — the fifth
+argument is `useEmu`, so when `lynxboot.img` is absent the core skips
+loading it and high-level-emulates the boot ROM instead
+(`CSystem::HLE_BIOS_FE00` and friends in `lynx/system.cpp`).
+
+So **all four systems boot with no BIOS file at all.** The symlinks are
+there for the case where you do own the dumps and would rather run the
+original ROMs — `dg_retroarch_system_bios` picks them up when present and
+warns and skips when not, which is why nothing here hard-fails.
 
 ## Applying
 
