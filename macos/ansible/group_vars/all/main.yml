@@ -1,0 +1,26 @@
+---
+dg_macos_rom_root: "{{ ansible_facts['user_dir'] }}/Games/roms"
+dg_macos_esde_home: "{{ ansible_facts['user_dir'] }}/ES-DE"
+dg_macos_rom_paths: {}
+dg_macos_create_rom_dirs: false
+dg_macos_systems:
+  - name: "gc"
+    fullname: "Nintendo GameCube"
+    extension: ".ciso .CISO .dff .DFF .dol .DOL .elf .ELF .gcm .GCM .gcz .GCZ .iso .ISO .json .JSON .m3u .M3U .rvz .RVZ .tgc .TGC .wad .WAD .wbfs .WBFS .wia .WIA .7z .7Z .zip .ZIP"
+    label: "Dolphin (Standalone)"
+    command: "%EMULATOR_DOLPHIN% -b -e %ROM%"
+  - name: "ps2"
+    fullname: "Sony PlayStation 2"
+    extension: ".bin .BIN .chd .CHD .ciso .CISO .cso .CSO .dump .DUMP .elf .ELF .gz .GZ .m3u .M3U .mdf .MDF .img .IMG .iso .ISO .isz .ISZ .ngr .NRG .zso .ZSO"
+    label: "PCSX2 (Standalone)"
+    command: "%EMULATOR_PCSX2% -batch %ROM%"
+  - name: "psp"
+    fullname: "Sony PlayStation Portable"
+    extension: ".chd .CHD .cso .CSO .elf .ELF .iso .ISO .pbp .PBP .prx .PRX .7z .7Z .zip .ZIP"
+    label: "PPSSPP (Standalone)"
+    command: "%EMULATOR_PPSSPP% %ROM%"
+  - name: "wii"
+    fullname: "Nintendo Wii"
+    extension: ".ciso .CISO .dff .DFF .dol .DOL .elf .ELF .gcm .GCM .gcz .GCZ .iso .ISO .json .JSON .m3u .M3U .rvz .RVZ .tgc .TGC .wad .WAD .wbfs .WBFS .wia .WIA .7z .7Z .zip .ZIP"
+    label: "Dolphin (Standalone)"
+    command: "%EMULATOR_DOLPHIN% -b -e %ROM%"
