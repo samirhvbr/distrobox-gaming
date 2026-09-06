@@ -16,8 +16,16 @@ place. A console game is eligible when its emulator has a usable macOS build;
 this exclusion is about Windows software, not console manufacturers.
 
 Other console emulators and macOS-compatible native ports can be added later.
-PS1, PS3, Dreamcast, retro cores, Switch, PS4 and Xbox are not configured by this
+PS1, PS3, Dreamcast, Switch, PS4 and Xbox are not configured by this
 first baseline. Their absence is not a claim that macOS support is impossible.
+
+## Retro collections
+
+RetroArch Metal now covers Atari 2600 (two separate collections), NES, SNES,
+Master System, Mega Drive, GBA, Game Boy/Color and Commodore 64. The installer
+also installs architecture-matched cores; existing cores are retained.
+See [Retro collections](INSTALL.md#retro-collections) for library mapping,
+metadata import, hotkeys and limitations.
 
 ## Install and configure
 

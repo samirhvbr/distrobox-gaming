@@ -8,8 +8,8 @@
     <path>{{ dg_macos_rom_paths.get(system.name, dg_macos_rom_root ~ '/' ~ system.name) | e }}</path>
     <extension>{{ system.extension | e }}</extension>
     <command label="{{ system.label | e }}">{{ system.command | e }}</command>
-    <platform>{{ system.name | e }}</platform>
-    <theme>{{ system.name | e }}</theme>
+    <platform>{{ system.platform | default(system.name) | e }}</platform>
+    <theme>{{ system.platform | default(system.name) | e }}</theme>
   </system>
 {% endfor %}
 </systemList>

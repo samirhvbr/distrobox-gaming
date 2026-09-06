@@ -41,10 +41,14 @@ with tempfile.TemporaryDirectory(prefix='dg-macos-test-') as temporary:
                for f in target.parent.glob('es_systems.xml.*')), 'No backup of previous config'
     tree = ET.parse(target)
     systems = {s.findtext('name'): s for s in tree.findall('system')}
-    assert set(systems) == {'gc', 'wii', 'ps2', 'psp'}
+    assert set(systems) == {'gc', 'wii', 'ps2', 'psp', 'atari2600', 'atari2600homebrew', 'nes', 'snes', 'mastersystem', 'megadrive', 'gba', 'gbc', 'c64'}
     assert systems['ps2'].findtext('path') == str(override), 'Host override ignored'
     assert systems['gc'].findtext('path') == str(roms / 'gc'), 'XML escaping corrupted path'
-    assert all('(Standalone)' in s.find('command').get('label') for s in systems.values())
+    assert all('(Standalone)' in systems[s].find('command').get('label')
+               for s in ('gc', 'wii', 'ps2', 'psp')), 'Standalone label lost'
+    assert 'stella_libretro.dylib' in systems['atari2600'].findtext('command')
+    assert '.zip' not in systems['atari2600'].findtext('extension')
+    assert systems['atari2600homebrew'].findtext('theme') == 'atari2600'
     assert not roms.exists() and not override.exists(), 'Created absent library mount'
     second = run()
     assert re.search(r'changed=0\s', second), second
