@@ -12,6 +12,30 @@ concise imperative subjects, no version prefix, no entry here. See
 Bodies are narrative: what changed, why, and what was measured. This file is
 never rewritten.
 
+## 0.2.1 - replace the Atari800 caveat with the core's own source
+
+`docs/atari.md` shipped a caveat asking whoever ran it first to confirm the
+per-core config directory the wrapper writes to, because the machine switch
+had been written from the libretro documentation. Reading
+[libretro-atari800](https://github.com/libretro/libretro-atari800)'s
+`libretro/libretro-core.c` settles it: `info->library_name = "Atari800"`, the
+option key is `atari800_system`, and the accepted machine values are
+`400/800 (OS B)`, `800XL (64K)`, `130XE (128K)`, `XEGS`, the three
+`Modern XL/XE` sizes and `5200`. The caveat is gone.
+
+It also corrected the reasoning, which had been weaker than the truth. The
+core already forces 5200 mode for a cart it recognises — `.a52` by extension,
+or `.bin`/`.rom` by CRC32 against a built-in database — but
+`if (autorunCartridge == A5200_CART || strcmp(var.value, "5200") == 0)` only
+turns 5200 mode **on**. Nothing turns it off, so a `.atr` launched after a
+5200 session boots as a 5200 with 16 KB of RAM and a 5200 joystick layout.
+That silent failure is the wrapper's actual purpose; the 5200 direction is a
+fallback for carts the CRC database does not carry.
+
+No behaviour change — the wrapper was already writing the correct value to
+the correct path. Pushed to the open PR as `63c25c7`. Z rather than Y: a
+documentation correction, not a new phase.
+
 ## 0.2.0 - record the macOS baseline and how the version tracks PR work
 
 Second delivery on this fork: the native macOS baseline under `macos/`,
