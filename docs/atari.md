@@ -19,10 +19,10 @@ a TOS revision is a per-machine choice and not a fleet-wide BIOS.
 | ES-DE system | Core | ROM dir | Extensions | BIOS |
 |---|---|---|---|---|
 | `atari2600` | `stella` | `roms/atari2600` | `.a26 .bin .rom .zip .7z` | none |
-| `atari5200` | `atari800` (wrapper) | `roms/atari5200` | `.a52 .bin .car .rom .zip .7z` | `5200.ROM` — **required** |
+| `atari5200` | `atari800` (wrapper) | `roms/atari5200` | `.a52 .bin .car .rom .zip .7z` | optional |
 | `atari7800` | `prosystem` | `roms/atari7800` | `.a78 .bin .zip .7z` | optional |
 | `atarilynx` | `handy` | `roms/atarilynx` | `.lnx .o .zip .7z` | `lynxboot.img` |
-| `atari800` | `atari800` (wrapper) | `roms/atari800` | `.atr .bas .bin .car .cas .dcm .xex .xfd .zip .7z` | `ATARIXL.ROM`, `ATARIBAS.ROM` |
+| `atari800` | `atari800` (wrapper) | `roms/atari800` | `.atr .bas .bin .car .cas .dcm .xex .xfd .zip .7z` | optional |
 
 All four sit in the light `roms/` tier alongside NES and SNES — Atari
 ROMs are kilobytes, and none of the `roms_mid` / `roms_heavy` /
@@ -94,13 +94,13 @@ out of `dg_bios_root` into `dg_retroarch_system_dir`
 (`~/.config/retroarch/system`), and a missing source warns and is skipped
 — same contract as the xemu BIOS links, nothing hard-fails.
 
-| File | Needed by |
-|---|---|
-| `5200.ROM` | Atari 5200. **Without it the core does not boot at all**, and silently — the wrapper prints its own stderr warning because ES-DE otherwise just looks like it ignored the launch |
-| `ATARIXL.ROM` | Atari 800, 800XL / 130XE machine types |
-| `ATARIBAS.ROM` | Atari 800, built-in BASIC |
-| `ATARIOSA.ROM` / `ATARIOSB.ROM` | Atari 800, 400/800 OS revs A and B |
-| `lynxboot.img` | Atari Lynx |
+| File | Used by | Needed? |
+|---|---|---|
+| `5200.ROM` | Atari 5200 | No — see AltirraOS below |
+| `ATARIXL.ROM` | Atari 800, 800XL / 130XE | No — see AltirraOS below |
+| `ATARIBAS.ROM` | Atari 800, built-in BASIC | No — see AltirraOS below |
+| `ATARIOSA.ROM` / `ATARIOSB.ROM` | Atari 800, 400/800 OS revs A and B | No |
+| `lynxboot.img` | Atari Lynx | **Yes** |
 
 Stella needs none. ProSystem takes an optional `7800 BIOS (U).rom`; it is
 left out of the list because the filename varies by dump and the core
@@ -110,6 +110,31 @@ uses a stable name.
 None of these are redistributable, so source them yourself into
 `dg_bios_root`, same as every other BIOS in
 [setup-assets.md](setup-assets.md).
+
+### The Atari 8-bit line and the 5200 need no BIOS at all
+
+The core **compiles in** Avery Lee's AltirraOS, a clean-room, freely
+redistributable replacement for Atari's OS ROMs — `altirra_5200_os.c`,
+`altirraos_800.c`, `altirraos_xl.c` and `altirra_basic.c` under
+`atari800/src/roms/`. Selecting it is a core option, not a file:
+
+| Option | Set to | Replaces |
+|---|---|---|
+| `atari800_os_5200` | `AltirraOS` | `5200.ROM` |
+| `atari800_os_xl` | `AltirraOS` | `ATARIXL.ROM` |
+| `atari800_os_800` | `AltirraOS` | `ATARIOSA/OSB.ROM` |
+| `atari800_basic_version` | `Altirra BASIC` | `ATARIBAS.ROM` |
+
+For the 5200 this is automatic: `bin/retroarch-atari800` writes
+`atari800_os_5200 = "Original"` when `5200.ROM` is present in the system
+dir and `"AltirraOS"` when it is not, so the console boots either way.
+The 8-bit options are left to you — set them in RetroArch's core options
+if you would rather not source the original ROMs. Compatibility is high
+but not identical: a title that pokes at OS internals may behave
+differently on the replacement.
+
+Only the **Lynx** genuinely requires a file here: `lynxboot.img` has no
+free equivalent bundled in the `handy` core.
 
 ## Applying
 

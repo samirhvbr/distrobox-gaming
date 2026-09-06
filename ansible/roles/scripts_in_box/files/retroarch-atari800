@@ -56,28 +56,44 @@ case $(printf '%s' "$rom" | tr '[:upper:]' '[:lower:]') in
   *) system=${DG_ATARI800_SYSTEM:-"800XL (64K)"} ;;
 esac
 
+# The core bundles Avery Lee's AltirraOS as a built-in, freely
+# redistributable replacement for the 5200 BIOS — it is compiled in as
+# atari800/src/roms/altirra_5200_os.c and selected by atari800_os_5200.
+# So a missing 5200.ROM is not fatal, it just needs choosing. Pick the
+# real BIOS when it is there and the built-in when it is not, rather
+# than leaving a launch that dies silently.
+os_5200=
+if [ "$system" = 5200 ]; then
+  if [ -e "$system_dir/5200.ROM" ] || [ -e "$system_dir/5200.rom" ]; then
+    os_5200='Original'
+  else
+    os_5200='AltirraOS'
+  fi
+fi
+
 if [ "${DG_ATARI800_PRINT_SYSTEM:-0}" = 1 ]; then
   printf '%s\n' "$system"
   printf '%s\n' "$opt_file"
+  [ -z "$os_5200" ] || printf 'atari800_os_5200=%s\n' "$os_5200"
   exit 0
 fi
 
-# The 5200 is the one machine type here that cannot boot at all without
-# its BIOS, and the core fails silently. Say so rather than let ES-DE
-# look like it ignored the launch.
-if [ "$system" = 5200 ] &&
-   [ ! -e "$system_dir/5200.ROM" ] && [ ! -e "$system_dir/5200.rom" ]; then
-  echo "retroarch-atari800: WARNING: $system_dir/5200.ROM is missing — the core will not boot." >&2
-fi
+# Rewrite one key in place, preserving every other core option.
+set_opt() {
+  _key=$1
+  _value=$2
+  _tmp=$(mktemp "$opt_dir/.atari800.opt.XXXXXX")
+  if [ -f "$opt_file" ]; then
+    grep -v "^${_key}[[:space:]]*=" "$opt_file" > "$_tmp" || true
+  fi
+  printf '%s = "%s"\n' "$_key" "$_value" >> "$_tmp"
+  mv -f "$_tmp" "$opt_file" || { rm -f "$_tmp"; return 1; }
+}
 
 mkdir -p "$opt_dir"
-tmp=$(mktemp "$opt_dir/.atari800.opt.XXXXXX")
-trap 'rm -f "$tmp"' EXIT INT TERM
-if [ -f "$opt_file" ]; then
-  grep -v '^atari800_system[[:space:]]*=' "$opt_file" > "$tmp" || true
+set_opt atari800_system "$system"
+if [ -n "$os_5200" ]; then
+  set_opt atari800_os_5200 "$os_5200"
 fi
-printf 'atari800_system = "%s"\n' "$system" >> "$tmp"
-mv -f "$tmp" "$opt_file"
-trap - EXIT INT TERM
 
 exec retroarch -L "$core_dir/atari800_libretro.so" "$rom" "$@"
