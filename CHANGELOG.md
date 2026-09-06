@@ -12,6 +12,29 @@ concise imperative subjects, no version prefix, no entry here. See
 Bodies are narrative: what changed, why, and what was measured. This file is
 never rewritten.
 
+## 0.3.1 - no Atari system needs a BIOS file, and ROMS/ stays out of git
+
+The BIOS table still marked `lynxboot.img` as required. Same mistake as the
+5200 one, made the same way — from documentation instead of the core.
+libretro-handy passes `!bios_found` as `CSystem`'s `useEmu` argument, so with
+no file it high-level-emulates the boot ROM (`CSystem::HLE_BIOS_FE00` in
+`lynx/system.cpp`). That closes it: stella never needed one, prosystem's is
+optional, atari800 compiles in AltirraOS, handy HLEs. `dg_retroarch_system_bios`
+is not a prerequisite list, it is there so whoever owns the dumps runs the
+originals — which is why every entry warns and skips instead of failing.
+
+Three wrong BIOS claims in one PR, all from reading docs rather than source.
+The pattern is worth naming: for an emulator core, the source is the only
+authority on what it requires.
+
+`.gitignore` gains `ROMS/` with the reason. Upstream's list is lowercase and
+git patterns are case-sensitive, so a `ROMS/` directory would slip past
+`roms/`. Downloaded game files are not going into a public fork: they are
+copyrighted, it would contradict the upstream repo's own stated policy
+(`docs/setup-assets.md`: "None of these are shipped with the repo — legal
+distribution rules"), and git history makes a mistake permanent. This is a
+fork-local pattern and stays out of the PR.
+
 ## 0.3.0 - the Atari 5200 and 8-bit line boot with no BIOS file
 
 Chasing a question about whether downloaded ROMs could go in this public fork

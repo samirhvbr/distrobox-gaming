@@ -33,3 +33,7 @@ saves/
 states/
 screenshots/
 captures/
+# Upstream's list is lowercase and git patterns are case-sensitive, so a
+# ROMS/ directory would slip past `roms/` on a case-sensitive filesystem.
+# Fork-local: this is where downloaded game files land on this machine.
+ROMS/

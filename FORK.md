@@ -70,6 +70,6 @@ git fetch upstream
 git rebase upstream/master        # or merge, if a PR branch is already open
 ```
 
-Fork-only commits (`version.md`, `CHANGELOG.md`, this file, `tools/`) are the
-only expected divergence on `master`. Keep it that way: anything else that lands
+Fork-only commits (`version.md`, `CHANGELOG.md`, this file, `tools/`, and the
+`ROMS/` line in `.gitignore`) are the only expected divergence on `master`. Keep it that way: anything else that lands
 here and not upstream is either a PR waiting to be opened or drift.
