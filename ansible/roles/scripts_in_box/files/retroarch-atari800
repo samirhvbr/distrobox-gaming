@@ -1,0 +1,69 @@
+#!/bin/sh
+# Launch a ROM on the RetroArch atari800 core with the right machine type.
+#
+# One core serves two ES-DE systems: the Atari 8-bit computer line
+# (atari800) and the Atari 5200 console (atari5200). Which machine it
+# boots is decided by the `atari800_system` core option, read once at
+# core init — RetroArch has no CLI flag for core options, so the only
+# way to drive it from a launcher is to write the core's .opt file
+# first. That is what this wrapper does, on every launch, which is also
+# why alternating between the two systems in ES-DE can never leave the
+# core stuck in the wrong machine type. Same pre-launch enforcement the
+# xemu wrapper uses for surface_scale.
+
+set -eu
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: retroarch-atari800 ROM [retroarch args...]" >&2
+  exit 64
+fi
+
+rom=$1
+shift
+
+cfg_dir=${RETROARCH_CONFIG_DIR:-"$HOME/.config/retroarch"}
+core_dir=${RETROARCH_CORE_DIR:-"$cfg_dir/cores"}
+system_dir=${RETROARCH_SYSTEM_DIR:-"$cfg_dir/system"}
+
+# RetroArch names the per-core config dir after the core's library_name,
+# which for this core is "Atari800". Match case-insensitively first so an
+# upstream rename degrades to "wrong dir" rather than "option silently
+# dropped"; fall back to the known name on a box where the core has never
+# run and the dir therefore does not exist yet.
+opt_dir=$(find "$cfg_dir/config" -maxdepth 1 -type d -iname 'atari800*' 2>/dev/null | head -n 1)
+[ -n "$opt_dir" ] || opt_dir="$cfg_dir/config/Atari800"
+opt_file="$opt_dir/$(basename "$opt_dir").opt"
+
+# ES-DE passes an absolute path, so the ROM's own system directory is the
+# signal. The .a52 extension is honoured too, for 5200 carts that ended up
+# filed outside roms/atari5200.
+case $(printf '%s' "$rom" | tr '[:upper:]' '[:lower:]') in
+  */atari5200/*|*.a52) system=5200 ;;
+  *) system=${DG_ATARI800_SYSTEM:-"800XL (64K)"} ;;
+esac
+
+if [ "${DG_ATARI800_PRINT_SYSTEM:-0}" = 1 ]; then
+  printf '%s\n' "$system"
+  printf '%s\n' "$opt_file"
+  exit 0
+fi
+
+# The 5200 is the one machine type here that cannot boot at all without
+# its BIOS, and the core fails silently. Say so rather than let ES-DE
+# look like it ignored the launch.
+if [ "$system" = 5200 ] &&
+   [ ! -e "$system_dir/5200.ROM" ] && [ ! -e "$system_dir/5200.rom" ]; then
+  echo "retroarch-atari800: WARNING: $system_dir/5200.ROM is missing — the core will not boot." >&2
+fi
+
+mkdir -p "$opt_dir"
+tmp=$(mktemp "$opt_dir/.atari800.opt.XXXXXX")
+trap 'rm -f "$tmp"' EXIT INT TERM
+if [ -f "$opt_file" ]; then
+  grep -v '^atari800_system[[:space:]]*=' "$opt_file" > "$tmp" || true
+fi
+printf 'atari800_system = "%s"\n' "$system" >> "$tmp"
+mv -f "$tmp" "$opt_file"
+trap - EXIT INT TERM
+
+exec retroarch -L "$core_dir/atari800_libretro.so" "$rom" "$@"
