@@ -12,6 +12,33 @@ concise imperative subjects, no version prefix, no entry here. See
 Bodies are narrative: what changed, why, and what was measured. This file is
 never rewritten.
 
+## 0.2.0 - record the macOS baseline and how the version tracks PR work
+
+Second delivery on this fork: the native macOS baseline under `macos/`,
+merged from `macos-baseline` and submitted as
+[PR #2](https://github.com/akitaonrails/distrobox-gaming/pull/2). ES-DE plus
+Dolphin, PCSX2 and PPSSPP over Homebrew, with its own Ansible playbook and no
+code shared with the Linux tree.
+
+Review of that work against the Ansible its own `Brewfile` installs turned up a
+first-run blocker: the missing-library message read `item.invocation.module_args.path`,
+and registered results stopped carrying `invocation` in ansible-core 2.19, so it
+passed on 2.15 and failed on 2.21 with `object of type 'dict' has no attribute
+'invocation'`. The task fires exactly when a ROM directory is absent — every new
+user's first run — so `bootstrap.sh check` died before configuring anything.
+Fixed by resolving the path from the loop item, and the integration test now has
+a recorded pass on both 2.15.13 and 2.21.3. The Portuguese install guide was
+translated to English as `macos/INSTALL.md`, since upstream's docs are English
+throughout and the page has to be able to move into a PR unchanged.
+
+`FORK.md` gains the clause repodocs requires to be written down: the version
+here numbers fork deliveries, and a delivery that ships as an upstream PR is
+recorded by the fork-only commit that follows it, not by the PR commit itself.
+A PR commit carrying `X.Y.Z` would push the fleet's format into someone else's
+`git log`, which is the thing the split convention exists to avoid.
+
+Y rather than Z: a completed phase, per repodocs' bump criteria.
+
 ## 0.1.0 - adopt the repodocs standard for fork-only work
 
 This is a fork of [akitaonrails/distrobox-gaming](https://github.com/akitaonrails/distrobox-gaming),

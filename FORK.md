@@ -34,6 +34,19 @@ With it enabled, a PR commit needs the documented bypass:
 REPODOCS_NO_HOOK=1 git commit
 ```
 
+## The bump clause, overridden in writing
+
+repodocs requires `version.md` to be bumped **in the same commit as the change
+it describes**, and allows a repository to stamp the version some other way only
+when its own documentation says so and says why. This is that statement.
+
+Here, a delivery that ships as an upstream pull request is recorded by the
+**fork-only commit that follows it**, not by the PR commit itself. The PR commit
+carries an upstream imperative subject and no version, because a `X.Y.Z` subject
+would push the fleet's format into someone else's `git log` — the exact thing
+the two-convention split above exists to prevent. `version.md` therefore numbers
+this fork's deliveries, and `CHANGELOG.md` names the PR each one went to.
+
 ## What is adopted from repodocs, and what is not
 
 **Adopted:** `version.md` (first semver in the file is the authority),
