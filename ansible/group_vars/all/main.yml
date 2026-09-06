@@ -107,12 +107,16 @@ dg_retroarch_buildbot: https://buildbot.libretro.com
 # source warns and is skipped, exactly like the xemu BIOS links.
 #
 # Who needs what:
-#   5200.ROM      atari800 core in 5200 mode (Atari 5200) — required
+#   5200.ROM      atari800 core in 5200 mode (Atari 5200)
 #   ATARIXL.ROM   atari800 core, 800XL/130XE machine types
 #   ATARIBAS.ROM  atari800 core, built-in BASIC (cartridge-less .bas)
 #   ATARIOSA.ROM  atari800 core, 400/800 OS rev A
 #   ATARIOSB.ROM  atari800 core, 400/800 OS rev B
 #   lynxboot.img  handy core (Atari Lynx)
+# Only the Lynx actually needs its file. The atari800 core compiles in
+# AltirraOS, a freely redistributable OS replacement, so the 5200 and the
+# 8-bit line boot without any of the four above — the wrapper selects it
+# for the 5200 automatically. See docs/atari.md.
 # Stella (2600) needs none. ProSystem (7800) takes an optional
 # "7800 BIOS (U).rom"; it is left out because the filename varies by
 # dump and the core boots fine without it. The list is the extension

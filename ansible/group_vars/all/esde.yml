@@ -411,9 +411,10 @@ dg_esde_systems:
   # Atari ST is defined below with its own BIOS profile and mandatory
   # focused installation checks; see docs/atari-st.md.
   #
-  # BIOS: 2600 needs none and 7800's is optional. The 5200, the 8-bit
-  # line and the Lynx look for one in RetroArch's system dir, which
-  # link_storage populates by symlink out of dg_bios_root
+  # BIOS: only the Lynx really needs one. 2600 needs none, 7800's is
+  # optional, and the atari800 core compiles in AltirraOS so the 5200 and
+  # the 8-bit line boot with no BIOS file at all. link_storage still
+  # symlinks the real ROMs out of dg_bios_root when you have them
   # (dg_retroarch_system_bios).
   # ---------------------------------------------------------------------
 
