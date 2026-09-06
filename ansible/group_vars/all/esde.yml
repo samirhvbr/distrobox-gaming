@@ -427,12 +427,13 @@ dg_esde_systems:
     theme: atari2600
 
   # The 5200 runs on the same atari800 core as the 8-bit computers below,
-  # switched by the `atari800_system` core option — a value the core reads
-  # at init, with no CLI flag to set it. bin/retroarch-atari800 writes the
-  # right value from the ROM's system dir immediately before every launch
-  # (the same pre-launch enforcement the xemu wrapper uses for
-  # surface_scale), so alternating between the two systems in ES-DE never
-  # leaves the core in the wrong machine type.
+  # switched by the `atari800_system` core option — read at core init,
+  # with no CLI flag to set it. The core auto-forces 5200 mode for a cart
+  # it recognises (.a52, or .bin/.rom by CRC), but that force is one-way:
+  # it never turns 5200 mode back OFF, so an .atr launched after a 5200
+  # session boots as a 5200. bin/retroarch-atari800 rewrites the option
+  # from the ROM's system dir before every launch to close that, the same
+  # pre-launch enforcement the xemu wrapper uses for surface_scale.
   - name: atari5200
     fullname: Atari 5200
     path: "{{ dg_emudeck_root }}/roms/atari5200"
