@@ -3,13 +3,26 @@
 #
 # One core serves two ES-DE systems: the Atari 8-bit computer line
 # (atari800) and the Atari 5200 console (atari5200). Which machine it
-# boots is decided by the `atari800_system` core option, read once at
-# core init — RetroArch has no CLI flag for core options, so the only
-# way to drive it from a launcher is to write the core's .opt file
-# first. That is what this wrapper does, on every launch, which is also
-# why alternating between the two systems in ES-DE can never leave the
-# core stuck in the wrong machine type. Same pre-launch enforcement the
-# xemu wrapper uses for surface_scale.
+# boots is the `atari800_system` core option, read at core init, and
+# RetroArch has no CLI flag for core options — the only way to drive it
+# from a launcher is to write the core's .opt file first. Same
+# pre-launch enforcement the xemu wrapper uses for surface_scale.
+#
+# The direction that actually matters is 8-bit, not 5200. Reading
+# libretro-atari800's libretro/libretro-core.c: the core already forces
+# 5200 mode on its own when it recognises a 5200 cart — by the .a52
+# extension, or by CRC32 against a built-in 5200 database for .bin/.rom
+# (lines 660-696). But that force is one-way:
+#
+#     if (autorunCartridge == A5200_CART || strcmp(var.value, "5200") == 0)
+#
+# turns 5200 mode ON and never off. So after a 5200 session leaves the
+# option at "5200", the next .atr or .xex boots as a 5200 — silently.
+# Rewriting the option per launch is what prevents that. On the 5200
+# side this is a fallback, for carts the CRC database does not know.
+#
+# Machine values the core accepts: 400/800 (OS B), 800XL (64K),
+# 130XE (128K), XEGS, Modern XL/XE(320K CS), (576K), (1088K), 5200.
 
 set -eu
 
@@ -25,11 +38,12 @@ cfg_dir=${RETROARCH_CONFIG_DIR:-"$HOME/.config/retroarch"}
 core_dir=${RETROARCH_CORE_DIR:-"$cfg_dir/cores"}
 system_dir=${RETROARCH_SYSTEM_DIR:-"$cfg_dir/system"}
 
-# RetroArch names the per-core config dir after the core's library_name,
-# which for this core is "Atari800". Match case-insensitively first so an
-# upstream rename degrades to "wrong dir" rather than "option silently
-# dropped"; fall back to the known name on a box where the core has never
-# run and the dir therefore does not exist yet.
+# RetroArch names the per-core config dir after the core's library_name.
+# It is "Atari800" (libretro-core.c: info->library_name = "Atari800").
+# Still matched case-insensitively first, so a future upstream rename
+# degrades to "wrote the wrong dir" rather than "option silently
+# dropped"; the literal is the fallback for a box where the core has
+# never run and the dir therefore does not exist yet.
 opt_dir=$(find "$cfg_dir/config" -maxdepth 1 -type d -iname 'atari800*' 2>/dev/null | head -n 1)
 [ -n "$opt_dir" ] || opt_dir="$cfg_dir/config/Atari800"
 opt_file="$opt_dir/$(basename "$opt_dir").opt"

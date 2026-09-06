@@ -49,32 +49,43 @@ retroarch-atari800 /…/roms/atari5200/Star\ Raiders.a52   # → atari800_system
 retroarch-atari800 /…/roms/atari800/Boulder\ Dash.atr    # → atari800_system = "800XL (64K)"
 ```
 
-Deciding it per launch rather than once at install is the point: the two
-ES-DE systems get alternated freely, and a value written at install time
-would leave whichever system was launched second booting as the wrong
-machine. Same pre-launch enforcement the xemu wrapper uses for
-`surface_scale`, and for the same reason — a value the emulator owns at
-runtime, re-asserted by the launcher instead of fought over.
+**The direction that matters is 8-bit, not 5200.** Reading the core's
+`libretro/libretro-core.c`, it already forces 5200 mode by itself when it
+recognises a 5200 cart — by the `.a52` extension, or by CRC32 against a
+built-in 5200 database for `.bin`/`.rom`. But that force is one-way:
+
+```c
+if (autorunCartridge == A5200_CART || strcmp(var.value, "5200") == 0)
+```
+
+turns 5200 mode **on** and never off. So once a 5200 session has left the
+option at `5200`, the next `.atr` or `.xex` boots as a 5200 — silently,
+with 16 KB of RAM and a 5200 joystick layout. Rewriting the option before
+every launch is what prevents that. On the 5200 side the wrapper is a
+fallback, covering carts whose CRC the core's database does not carry.
+
+Same pre-launch enforcement the xemu wrapper uses for `surface_scale`,
+and for the same reason — a value the emulator owns at runtime,
+re-asserted by the launcher instead of fought over.
 
 Selection is by the ROM's own directory, with `.a52` honoured as a
 fallback for 5200 carts filed outside `roms/atari5200`. The 8-bit machine
-type can be overridden with `DG_ATARI800_SYSTEM` (e.g. `130XE (128K)`),
-and `DG_ATARI800_PRINT_SYSTEM=1` makes the wrapper print its decision and
-the `.opt` path it would write, without launching anything.
-
-The wrapper writes into `config/<library_name>/<library_name>.opt` under
-`dg_retroarch_dir`. RetroArch names that directory after the core's
-`library_name`, which is `Atari800`; the wrapper matches it
-case-insensitively first and falls back to that literal name on a box
-where the core has never run. **After the first Atari 800 launch, confirm
-the directory RetroArch actually created is the one being written** — if
-upstream ever renames the core, the option lands in an orphan file and
-the 5200 silently boots as an 800XL:
+type can be overridden with `DG_ATARI800_SYSTEM`; the core accepts
+`400/800 (OS B)`, `800XL (64K)` (our default), `130XE (128K)`, `XEGS`,
+`Modern XL/XE(320K CS)`, `(576K)` and `(1088K)`. `DG_ATARI800_PRINT_SYSTEM=1`
+makes the wrapper print its decision and the `.opt` path it would write,
+without launching anything:
 
 ```sh
-ls ~/.config/retroarch/config | grep -i atari
 DG_ATARI800_PRINT_SYSTEM=1 ~/bin/retroarch-atari800 /path/to/roms/atari5200/any.a52
 ```
+
+The target is `config/Atari800/Atari800.opt` under `dg_retroarch_dir`.
+RetroArch names that directory after the core's `library_name`, which
+this core sets to `Atari800` (`info->library_name = "Atari800"`). The
+wrapper still matches the directory case-insensitively first, so a future
+upstream rename degrades to writing the wrong directory rather than
+dropping the option without a trace.
 
 ## BIOS
 
@@ -140,8 +151,12 @@ missing `config/Atari800/`, replacement rather than duplication of an
 existing `atari800_system` line, unrelated core options left intact, and
 no temp file left behind on repeat runs.
 
-**The cores themselves have not been launched on real hardware from this
-change.** The ES-DE entries, BIOS filenames and core `library_name` are
-written from this repo's conventions and the libretro core documentation,
-and want a confirming run on the box — starting with the `ls` check
-above.
+The core's `library_name`, the `atari800_system` option key, its accepted
+machine values and the 5200 auto-detection were read from
+[libretro-atari800](https://github.com/libretro/libretro-atari800)'s
+`libretro/libretro-core.c` rather than assumed, and the ES-DE commands,
+extensions and platform names come from ES-DE's own system definitions.
+
+**The cores themselves have still not been launched on real hardware from
+this change** — video, audio, controllers and BIOS compatibility want a
+confirming run on the box.
