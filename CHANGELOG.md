@@ -12,6 +12,33 @@ concise imperative subjects, no version prefix, no entry here. See
 Bodies are narrative: what changed, why, and what was measured. This file is
 never rewritten.
 
+## 0.3.0 - the Atari 5200 and 8-bit line boot with no BIOS file
+
+Chasing a question about whether downloaded ROMs could go in this public fork
+led back into the atari800 core's source, and it contradicted something the
+Atari PR asserted twice: that `5200.ROM` was required and the core would not
+boot without it.
+
+libretro-atari800 **compiles in** Avery Lee's AltirraOS, a clean-room and
+freely redistributable replacement for Atari's OS ROMs —
+`atari800/src/roms/altirra_5200_os.c`, `altirraos_800.c`, `altirraos_xl.c`
+and `altirra_basic.c` — selected through the `atari800_os_5200`,
+`atari800_os_xl`, `atari800_os_800` and `atari800_basic_version` options. Of
+everything `dg_retroarch_system_bios` links, only the Lynx's `lynxboot.img`
+is genuinely required; the `handy` core bundles no equivalent.
+
+`bin/retroarch-atari800` therefore stopped warning and started fixing: it
+writes `atari800_os_5200 = "Original"` when the BIOS is present and
+`"AltirraOS"` when it is not, turning a silently dead launch into a working
+one. The 8-bit equivalents are documented rather than automated — someone
+holding the real ROMs may prefer them, and AltirraOS compatibility is high
+but not identical. The option write became a `set_opt` helper so a second key
+did not duplicate the read-filter-replace logic.
+
+Pushed to the open PR as `0d4eff6`. Y rather than Z: this removes a hard
+prerequisite from two of the four systems, which is a capability change, not
+a wording fix.
+
 ## 0.2.1 - replace the Atari800 caveat with the core's own source
 
 `docs/atari.md` shipped a caveat asking whoever ran it first to confirm the
